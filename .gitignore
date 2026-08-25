@@ -3,3 +3,4 @@ Hackaton2026/*
 *.csv
 *.txt
 *.xlsx
+npi-tracker/node_modules/*
