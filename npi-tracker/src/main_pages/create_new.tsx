@@ -9,18 +9,7 @@ import {
 import OrderDetailsStep from "../components/new_build_components/OrderDetails";
 import RackSn from "../components/new_build_components/RackSn";
 import ReviewBuild from "../components/new_build_components/ReviewBuild";
-
-interface BuildData {
-
-    orderDetails: {
-        buildId: string;
-        crdRevision: string;
-        buildStage: string;
-        rackQty: number;
-    };
-
-    racks: string[];
-}
+import { DEFAULT_BUILD_DATA, type BuildData} from "../models/BuildData";
 
 export default function CreateNew() {
 
@@ -31,16 +20,7 @@ export default function CreateNew() {
         useState(false);
 
     const [buildData, setBuildData] =
-        useState<BuildData>({
-            orderDetails: {
-                buildId: "",
-                crdRevision: "",
-                buildStage: "",
-                rackQty: 0
-            },
-
-            racks: []
-        });
+        useState<BuildData>(DEFAULT_BUILD_DATA);
 
     async function handleCreateBuild() {
 

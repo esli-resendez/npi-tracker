@@ -1,56 +1,151 @@
-import { Button, Label, Input } from '@fluentui/react-components';
-import { useState } from 'react';
+import {
+    Button,
+    Input,
+    Label
+} from "@fluentui/react-components";
 
-const MAX_SERIAL_NUMBERS = 50;
+import type {
+    BuildData
+} from "../../models/BuildData";
 
-const RackSn = () => {
-	const [serialNumbers, setSerialNumbers] = useState<string[]>(['']);
+interface RackSnProps {
+    buildData: BuildData;
+    setBuildData:
+        React.Dispatch<
+            React.SetStateAction<BuildData>
+        >;
+}
 
-	const updateSerialNumber = (index: number, value: string) => {
-		setSerialNumbers((current) =>
-			current.map((serialNumber, serialIndex) =>
-				serialIndex === index ? value : serialNumber,
-			),
-		);
-	};
+export default function RackSn({
+    buildData,
+    setBuildData
+}: RackSnProps) {
 
-	const addSerialNumber = () => {
-		if (serialNumbers.length < MAX_SERIAL_NUMBERS) {
-			setSerialNumbers((current) => [...current, '']);
-		}
-	};
+    const updateRackSerial = (
+        index: number,
+        value: string
+    ) => {
 
-	return (
-		<div id='capture_sn_main'>
-			{serialNumbers.map((serialNumber, index) => {
-				const inputId = `rack-serial-${index + 1}`;
+        setBuildData(current => ({...current,
+            racks: current.racks.map(
+                (rack, rackIndex) =>
+                    rackIndex === index
+                        ? {
+                            ...rack,
+                            rackSerial: value
+                        }
+                        : rack
+            )
+        }));
+    };
 
-				return (
-					<div key={inputId}>
-						<Label htmlFor={inputId}>Rack Serial {index + 1}</Label>
-						<Input
-							id={inputId}
-							name={inputId}
-							type="text"
-							value={serialNumber}
-							onChange={(event) =>
-								updateSerialNumber(index, event.target.value)
-							}
-						/>
-					</div>
-				);
-			})}
+    const addRack = () => {
 
-			<Button
-				type="button"
-				onClick={addSerialNumber}
-				disabled={serialNumbers.length >= MAX_SERIAL_NUMBERS}
-				aria-label="Add rack serial number"
-			>
-				+
-			</Button>
-		</div>
-	);
-};
+        setBuildData(current => ({
+            ...current,
+            racks: [
+                ...current.racks,
+                {
+                    rackSerial: ""
+                }
+            ]
+        }));
+    };
 
-export default RackSn;
+    const removeRack = (
+        index: number
+    ) => {
+
+        setBuildData(current => ({
+
+            ...current,
+
+            racks: current.racks.filter(
+                (_, rackIndex) =>
+                    rackIndex !== index
+            )
+        }));
+    };
+
+    return (
+
+        <div>
+
+            <h2>
+                Rack Serial Numbers
+            </h2>
+
+            {
+                buildData.racks.map(
+                    (rack, index) => (
+
+                        <div
+                            key={index}
+                            style={{
+                                display: "flex",
+                                gap: "10px",
+                                marginBottom: "10px",
+                                alignItems: "center"
+                            }}
+                        >
+
+                            <div
+                                style={{
+                                    display: "flex",
+                                    flexDirection:
+                                        "column",
+                                    flexGrow: 1
+                                }}
+                            >
+
+                                <Label>
+                                    Rack Serial
+                                    {" "}
+                                    {index + 1}
+                                </Label>
+
+                                <Input
+                                    value={
+                                        rack.rackSerial
+                                    }
+
+                                    onChange={(
+                                        _,
+                                        data
+                                    ) =>
+                                        updateRackSerial(
+                                            index,
+                                            data.value
+                                        )
+                                    }
+                                />
+
+                            </div>
+
+                            <Button
+                                appearance="secondary"
+
+                                onClick={() =>
+                                    removeRack(
+                                        index
+                                    )
+                                }
+                            >
+                                -
+                            </Button>
+
+                        </div>
+                    )
+                )
+            }
+
+            <Button
+                appearance="primary"
+                onClick={addRack}
+            >
+                +
+            </Button>
+
+        </div>
+    );
+}
