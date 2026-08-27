@@ -1,6 +1,14 @@
 Hackaton2026/
 Hackaton2026/*
 *.csv
-*.txt
 *.xlsx
 npi-tracker/node_modules/*
+npi-backend/.venv/*
+npi-backend/.venv/
+npi-backend/__pycache__/
+npi-backend/__pycache__/*
+npi-backend/*.pyc
+.venv/
+.env
+__pycache__/
+*.pyc

@@ -1,0 +1,122 @@
+.app-container {
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background-color: #f3f2f1;
+
+  font-family:
+    "Segoe UI",
+    Arial,
+    sans-serif;
+}
+
+/* Banner */
+
+.banner {
+  font-size: 40px;
+  letter-spacing: -1.68px;
+  background-color: #0078d4;
+  color: white;
+  text-align: center;
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+/* Navigation */
+
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px;
+  background-color: white;
+  border-bottom: 1px solid #e1dfdd;
+}
+
+.navbar button {
+  background: none;
+
+  border: none;
+
+  padding: 8px 16px;
+
+  cursor: pointer;
+
+  font-size: 14px;
+}
+
+.navbar button:hover {
+  background-color: #f3f2f1;
+}
+
+/* Content */
+
+.content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px;
+}
+
+.content-card {
+  width: 900px;
+
+  background-color: white;
+
+  border-radius: 8px;
+
+  padding: 24px;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.primary-button {
+  background-color: #0078d4;
+
+  color: white;
+
+  border: none;
+
+  padding: 10px 16px;
+
+  border-radius: 4px;
+
+  cursor: pointer;
+
+  margin-bottom: 20px;
+}
+
+.primary-button:hover {
+  background-color: #106ebe;
+}
+
+.orders-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.order-card {
+  border: 1px solid #e1dfdd;
+
+  border-radius: 6px;
+
+  padding: 16px;
+
+  background-color: #faf9f8;
+}
+
+/* Footer */
+
+.footer {
+  text-align: center;
+  padding: 10px;
+  background-color: white;
+  border-top: 1px solid #e1dfdd;
+}
+
