@@ -1,7 +1,6 @@
-import { Title1 } from "@fluentui/react-components";
 import { Input, InfoLabel, Dropdown, Option } from "@fluentui/react-components";
 import { type BuildData } from "../../models/BuildData";
-import '../styles/App.css';
+//import '../styles/App.css';
 
 interface OrderDetailsStepProps {
     buildData: BuildData;
@@ -35,8 +34,15 @@ const updateRackQty = (value: string) => {
 };
 
   return (
-    <div id="orderdetails_div">
-        <Title1>Create New Build for tracking</Title1>
+    <div
+        id="orderdetails_div"
+        style={{
+            display: "grid",
+            gridTemplateColumns: "max-content minmax(0, 1fr)",
+            gap: "12px 16px",
+            alignItems: "center",
+        }}
+    >
         <InfoLabel>Build ID Tracking</InfoLabel>
             <Input
                 id="order_number_txt"

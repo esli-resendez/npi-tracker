@@ -148,10 +148,7 @@ export default function CreateNew() {
     return (
 
         <div className="create-build-container">
-
-            <h1>
-                Create New Build
-            </h1>
+            <h1>Create a new Build to track</h1>
 
             <div
                 style={{
