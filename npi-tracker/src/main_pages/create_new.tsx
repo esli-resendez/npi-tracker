@@ -108,9 +108,7 @@ export default function CreateNew() {
                 return (
                     <Card>
 
-                        <h2>
-                            Build Created
-                        </h2>
+                        <h2>Build Created</h2>
 
                         <p>
                             Order:
@@ -122,8 +120,7 @@ export default function CreateNew() {
                             }
                         </p>
 
-                        <p>
-                            The build was
+                        <p> The build was
                             successfully
                             created.
                         </p>
@@ -149,62 +146,26 @@ export default function CreateNew() {
 
         <div className="create-build-container">
             <h1>Create a new Build to track</h1>
-
-            <div
-                style={{
-                    marginBottom: "20px"
-                }}
-            >
-                Step {currentStep}
-                {" / "}
-                4
-
-                <ProgressBar
-                    value={
-                        currentStep / 4
-                    }
-                />
+            <div className="prog-bar" id="prog-bar-div">
+                Step {currentStep}{" / "}4
+                <ProgressBar value={currentStep / 4}/>
             </div>
-
             {renderStep()}
-
             {
                 currentStep <= 3 && (
-
-                    <div
-                        style={{
-                            marginTop: "20px",
-                            display: "flex",
-                            gap: "10px"
-                        }}
-                    >
-
-                        {
-                            currentStep > 1 && (
-
-                                <Button
-                                    onClick={() =>
-                                        setCurrentStep(
-                                            currentStep - 1
-                                        )
-                                    }
-                                >
+                    <div id="prog-btn-div" className="prog-btn">
+                        { currentStep > 1 && (
+                                <Button onClick={() => setCurrentStep(currentStep - 1)}>
                                     Previous
                                 </Button>
                             )
                         }
-
                         {
                             currentStep < 3 && (
-
-                                <Button
-                                    appearance="primary"
+                                <Button appearance="primary"
                                     onClick={() =>
-                                        setCurrentStep(
-                                            currentStep + 1
-                                        )
-                                    }
-                                >
+                                        setCurrentStep(currentStep + 1)
+                                    }>
                                     Next
                                 </Button>
                             )
@@ -212,15 +173,10 @@ export default function CreateNew() {
 
                         {
                             currentStep === 3 && (
-
                                 <Button
                                     appearance="primary"
-                                    onClick={
-                                        handleCreateBuild
-                                    }
-                                    disabled={
-                                        isSubmitting
-                                    }
+                                    onClick={ handleCreateBuild}
+                                    disabled={ isSubmitting }
                                 >
                                     {
                                         isSubmitting
@@ -230,7 +186,6 @@ export default function CreateNew() {
                                 </Button>
                             )
                         }
-
                     </div>
                 )
             }

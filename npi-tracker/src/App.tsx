@@ -1,4 +1,5 @@
 import './styles/App.css';
+import { FluentProvider } from '@fluentui/react-components';
 import Banner from './components/Banner';
 import NavBar from './components/Navbar';
 import Footer from './components/Footer';
@@ -6,7 +7,7 @@ import MainScreen from './main_pages/main';
 
 function App() {
   return (
-    <div className="app-container">
+    <FluentProvider className="app-container">
 
       {/* Banner */}
       <Banner/>
@@ -19,7 +20,7 @@ function App() {
       {/* Footer */}
       <Footer/>
 
-    </div>
+    </FluentProvider>
   );
 }
 

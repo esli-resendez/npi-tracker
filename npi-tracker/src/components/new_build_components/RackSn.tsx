@@ -53,20 +53,15 @@ export default function RackSn({
 
     return (
         <div id="racksn_capture_main">
-            <h2 id="r_h2" className="head-2">Rack Serial Numbers
-            </h2>
+            <h2 id="r_h2" className="head-2">Rack Serial Numbers</h2>
             {
                 buildData.racks.map((rack, index) => (
                         <div key={index} className="racksn-index">
                             <div className="racksn-item">
                                 <Label>Rack Serial {" "}{index + 1}</Label>
                                 <Input value={rack.rackSerial}
-                                    onChange={(_,data) =>
-                                        updateRackSerial(
-                                            index,
-                                            data.value
-                                        )
-                                    }/>
+                                    onChange={(event) => updateRackSerial(index, event.target.value)}
+                                    className="f-ui-input"/>
                             </div>
                             <Button appearance="secondary"
                                 onClick={() => removeRack(index)}>
