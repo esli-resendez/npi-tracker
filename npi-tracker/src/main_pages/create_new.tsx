@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import {
+    Title2,
     Button,
     Card,
     ProgressBar
@@ -10,6 +11,7 @@ import OrderDetailsStep from "../components/new_build_components/OrderDetails";
 import RackSn from "../components/new_build_components/RackSn";
 import ReviewBuild from "../components/new_build_components/ReviewBuild";
 import { DEFAULT_BUILD_DATA, type BuildData} from "../models/BuildData";
+import UserCapture from "../components/new_build_components/UserCapture";
 
 export default function CreateNew() {
 
@@ -54,7 +56,7 @@ export default function CreateNew() {
                 result
             );
 
-            setCurrentStep(4);
+            setCurrentStep(5);
         }
         catch (error) {
 
@@ -75,39 +77,21 @@ export default function CreateNew() {
         switch (currentStep) {
 
             case 1:
-                return (
-                    <OrderDetailsStep
-                        buildData={buildData}
-                        setBuildData={
-                            setBuildData
-                        }
-                    />
-                );
-
+                return (<OrderDetailsStep buildData={buildData} 
+                    setBuildData={ setBuildData} />);
             case 2:
-                return (
-                    <RackSn
-                        buildData={buildData}
-                        setBuildData={
-                            setBuildData
-                        }
-                    />
-                );
+                return (<RackSn buildData={buildData} 
+                    setBuildData={setBuildData}/>);
 
             case 3:
-                return (
-                    <ReviewBuild
-                        buildData={buildData}
-                        onSubmit={
-                            handleCreateBuild
-                        }
-                    />
-                );
-
+                return (<UserCapture buildData={buildData}
+                        setBuildData={setBuildData} />);
             case 4:
+                return (<ReviewBuild buildData={buildData}
+                        onSubmit={handleCreateBuild} />);
+            case 5:
                 return (
                     <Card>
-
                         <h2>Build Created</h2>
 
                         <p>
@@ -145,14 +129,14 @@ export default function CreateNew() {
     return (
 
         <div className="create-build-container">
-            <h1>Create a new Build to track</h1>
+            <Title2>Create a new Build to track</Title2>
             <div className="prog-bar" id="prog-bar-div">
-                Step {currentStep}{" / "}4
-                <ProgressBar value={currentStep / 4}/>
+                Step {currentStep}{" / "}5
+                <ProgressBar value={currentStep / 5}/>
             </div>
             {renderStep()}
             {
-                currentStep <= 3 && (
+                currentStep <= 4 && (
                     <div id="prog-btn-div" className="prog-btn">
                         { currentStep > 1 && (
                                 <Button onClick={() => setCurrentStep(currentStep - 1)}>
@@ -161,7 +145,7 @@ export default function CreateNew() {
                             )
                         }
                         {
-                            currentStep < 3 && (
+                            currentStep < 4 && (
                                 <Button appearance="primary"
                                     onClick={() =>
                                         setCurrentStep(currentStep + 1)
@@ -172,7 +156,7 @@ export default function CreateNew() {
                         }
 
                         {
-                            currentStep === 3 && (
+                            currentStep === 4 && (
                                 <Button
                                     appearance="primary"
                                     onClick={ handleCreateBuild}

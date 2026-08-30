@@ -2,11 +2,11 @@ import React from "react";
 import {
   Input,
   InfoLabel,
-  Dropdown,
-  Option,
+  Slider,
 } from "@fluentui/react-components";
 
 import type { BuildData } from "../../models/BuildData";
+import FormField from "./FormField";
 
 interface OrderDetailsStepProps {
   buildData: BuildData;
@@ -30,17 +30,14 @@ export default function OrderDetailsStep({
     }));
   };
 
-  const updateRackQty = (value: string) => {
-    const qty = Number(value) || 0;
+  const updateRackQty = (value:number) => {
 
     setBuildData((current) => {
       const existing = [...current.racks];
-
-      while (existing.length < qty) {
+      while (existing.length < value) {
         existing.push({
           rackSerial: "",
-        });
-      }
+        }); }
 
       return {
         ...current,
@@ -48,7 +45,7 @@ export default function OrderDetailsStep({
           ...current.orderDetails,
           rackQty: value,
         },
-        racks: existing.slice(0, qty),
+        racks: existing.slice(0, value),
       };
     });
   };
@@ -59,53 +56,65 @@ export default function OrderDetailsStep({
       <Input
         className="ord-details-input"
         value={buildData.orderDetails.buildId}
+        disabled={true}
         onChange={(event) =>
           updateBuildData("buildId", event.target.value)
         }
       />
-
-      <InfoLabel>CRD</InfoLabel>
-      <Input
-        className="ord-details-input"
-        value={buildData.orderDetails.crdNumber}
-        onChange={(event) =>
-          updateBuildData("crdNumber", event.target.value)
-        }
+      
+      <FormField
+      label="Rack SKU Number"
+      field="rackSku"
+      value={buildData.orderDetails.rackSku}
+      maxlen={20}
+      onChange={updateBuildData}
+      />
+      
+      <FormField
+      label="Rack Assy Name"
+      field="rackGenName"
+      value={buildData.orderDetails.rackGenName}
+      maxlen={100}
+      onChange={updateBuildData}
       />
 
-      <InfoLabel>Revision</InfoLabel>
-      <Input
-        className="ord-details-input"
-        value={buildData.orderDetails.crdRevision}
-        onChange={(event) =>
-          updateBuildData("crdRevision", event.target.value)
-        }
+      <FormField
+      label="CRD DOC SKU"
+      field="crdNumber"
+      value={buildData.orderDetails.crdNumber}
+      maxlen={20}
+      onChange={updateBuildData}
       />
 
-      <InfoLabel>Build Stage</InfoLabel>
-      <Dropdown
-        className="ord-details-dropdown"
-        selectedOptions={[
-          buildData.orderDetails.buildStage,
-        ]}
-        onOptionSelect={(_, data) =>
-          updateBuildData(
-            "buildStage",
-            data.optionValue ?? ""
-          )
+      <FormField
+      label="CRD Revision"
+      field="crdRevision"
+      value={buildData.orderDetails.crdRevision}
+      maxlen={4}
+      onChange={updateBuildData}
+      />
+
+      <InfoLabel htmlFor="build-stage-select">Build Stage</InfoLabel>
+      <select
+        id="build-stage-select"
+        className="ord-details-native-select"
+        value={buildData.orderDetails.buildStage}
+        onChange={(event) =>
+          updateBuildData("buildStage", event.target.value)
         }
       >
-        <Option className="ord-details-listbox" value="EV">EV</Option>
-        <Option className="ord-details-listbox" value="PV">PV</Option>
-        <Option className="ord-details-listbox" value="MP">MP</Option>
-        <Option className="ord-details-listbox" value="CR">CR</Option>
-      </Dropdown>
+        <option value="" disabled>
+          Select a stage
+        </option>
+        <option value="EV">EV Build</option>
+        <option value="PV">PV Build</option>
+        <option value="MP">Mass Prod validation</option>
+        <option value="CR">Control Run</option>
+      </select>
 
       <InfoLabel>Rack QTY</InfoLabel>
-      <Input
-        className="ord-details-input"
-        value={buildData.orderDetails.rackQty}
-        onChange={(event) => updateRackQty(event.target.value)}
+      <Slider min={1} max={5} step={1} defaultValue={1}
+      onChange={(event) => updateRackQty(event.target.valueAsNumber)}
       />
     </div>
   );

@@ -3,9 +3,10 @@ import {
   Card,
   Title2
 } from "@fluentui/react-components";
+import type { BuildData, RackInfo, AssignedUsers } from "../../models/BuildData";
 
 interface ReviewBuildProps {
-  buildData: any;
+  buildData: BuildData;
   onSubmit: () => void;
 }
 
@@ -16,49 +17,37 @@ export default function ReviewBuild({
 
   return (
     <div>
-
-      <Title2>
-        Review Build
-      </Title2>
-
+      <Title2>Review Build</Title2>
       <Card>
-
         <h3>Order Details</h3>
-
         <p>
           Build ID:
           {buildData.orderDetails.buildId}
         </p>
-
         <p>
           CRD Revision:
           {buildData.orderDetails.crdRevision}
         </p>
-
         <p>
           Build Stage:
           {buildData.orderDetails.buildStage}
         </p>
-
         <p>
           Rack Quantity:
-          {buildData.orderDetails.rackQty}
+          {buildData.orderDetails.rackQty.toString()}
         </p>
-
       </Card>
 
       <Card>
-
         <h3>Rack Serials</h3>
-
         {
           buildData.racks.map(
             (
-              rack: string,
+              rack: RackInfo,
               index: number
             ) => (
               <p key={index}>
-                {rack}
+                {rack.rackSerial}
               </p>
             )
           )
@@ -66,12 +55,21 @@ export default function ReviewBuild({
 
       </Card>
 
-      <Button
-        appearance="primary"
-        onClick={onSubmit}
-      >
-        Create Build
-      </Button>
+      <Card>
+        <h3>Assigned Users</h3>
+        {
+          buildData.team.length > 0
+            ? buildData.team.map(
+                (member: AssignedUsers) => (
+                  <p key={member.user_email}>
+                    {member.user_email}
+                  </p>
+                )
+              )
+            : <p>No users assigned.</p>
+        }
+      </Card>
+
 
     </div>
   );

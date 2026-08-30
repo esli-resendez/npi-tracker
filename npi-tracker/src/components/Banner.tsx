@@ -1,10 +1,12 @@
-import { Title1 } from "@fluentui/react-components";
+import { Title1 } from '@fluentui/react-components';
 import '../styles/App.css';
 
 export default function Banner() {
   return (
-    <div className="banner">
-      <div>SCHIE NPI Tracking System</div>
-    </div>
+      <Title1>
+      <h1 className='banner'>SCHIE NPI Tracking System</h1>
+      </Title1>
+
+    
   );
 }

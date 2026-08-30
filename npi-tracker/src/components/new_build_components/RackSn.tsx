@@ -39,6 +39,11 @@ export default function RackSn({
     };
 
     const addRack = () => {
+        // Limit user to manual inputs to 5 racks 
+        if (buildData.racks.length >= 5){
+            console.log("Manual entry is limited to 5 rack tracking");
+            return;
+        }
         setBuildData(current => ({ ...current,
                 racks: [...current.racks, {rackSerial: ""}
             ]
@@ -53,7 +58,7 @@ export default function RackSn({
 
     return (
         <div id="racksn_capture_main">
-            <h2 id="r_h2" className="head-2">Rack Serial Numbers</h2>
+            <h2 id="r_h2" className="head-2">Capture up to 5 Rack Serial Numbers</h2>
             {
                 buildData.racks.map((rack, index) => (
                         <div key={index} className="racksn-index">
@@ -70,9 +75,9 @@ export default function RackSn({
                         </div>
                     ))}
 
-            <Button appearance="primary" onClick={addRack}>
-                +
-            </Button>
+            <Button id="addrack_btn"
+            disabled={buildData.racks.length >= 5 } 
+            appearance="primary" onClick={addRack}>+</Button>
         </div>
     );
 }

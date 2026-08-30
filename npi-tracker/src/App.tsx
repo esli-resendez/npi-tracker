@@ -1,5 +1,5 @@
 import './styles/App.css';
-import { FluentProvider } from '@fluentui/react-components';
+import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import Banner from './components/Banner';
 import NavBar from './components/Navbar';
 import Footer from './components/Footer';
@@ -7,7 +7,7 @@ import MainScreen from './main_pages/main';
 
 function App() {
   return (
-    <FluentProvider className="app-container">
+    <FluentProvider id='fprovider-main' className="app-container" theme={webLightTheme}>
 
       {/* Banner */}
       <Banner/>

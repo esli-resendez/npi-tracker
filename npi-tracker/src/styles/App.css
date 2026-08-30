@@ -1,3 +1,22 @@
+/*
+
+MSFT Pallette
+
+Microsoft Blue #0078D4
+Lens background #E6E6E6
+Metric border #CCCCCC
+Subtitle gray #666666
+
+*/
+
+
+:root {
+  --msfg-blue: #0078D4;
+  --input-bg-color: #E6E6E6;
+  --input-text-color: #243a5e;
+  --input-border-color: #0078D4;
+}
+
 .app-container {
   min-height: 100vh;
   display: flex;
@@ -21,8 +40,8 @@
 .banner {
   font-size: 40px;
   letter-spacing: -1.68px;
-  background-color: #0078d4;
-  color: white;
+  background-color: var(--msfg-blue);
+  color: var(--input-bg-color);
   text-align: center;
   font-family: sans-serif;
   padding: 20px;
@@ -111,7 +130,7 @@
   display: flex;
   gap: 10px;
   margin-bottom: 10px;
-  align-items: center
+  align-items: flex-end;
   }
 
 .racksn-item{
@@ -120,13 +139,13 @@
   flex-grow: 1;
 }
 
-.f-ui-input{
+.f-ui-input,
+.f-ui-input input {
   gap: 5px;
   align-items: right;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: black;
-  color: #10013b;
-
+  background-color: var(--input-bg-color);
+  color: var(--input-text-color);
 }
 
 .prog-btn {
@@ -147,27 +166,18 @@
   align-items: center;
 }
 
-.ord-details-input {
-  background-color: #000000;
-  color: #ffffff;
-}
-
+.ord-details-input,
 .ord-details-input input {
-  background-color: #000000;
-  color: #ffffff;
+  background-color: var(--input-bg-color);
+  color: var(--input-text-color);
 }
 
-.ord-details-dropdown {
-  background-color: #000000;
-  color: #ffffff;
-}
-
-.ord-details-dropdown button {
-  background-color: #000000;
-  color: #ffffff;
-}
-
-.ord-details-listbox {
-  background-color: #000000;
-  color: #ffffff;
+.ord-details-native-select {
+  background-color: var(--input-bg-color);
+  color: var(--input-text-color);
+  padding: 6px 8px;
+  border: 1px solid var(--input-border-color);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: inherit;
 }
