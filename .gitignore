@@ -12,3 +12,4 @@ npi-backend/*.pyc
 .env
 __pycache__/
 *.pyc
+npi-tracker-schema-partial.sql
