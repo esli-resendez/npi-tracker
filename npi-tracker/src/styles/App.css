@@ -41,12 +41,14 @@ Subtitle gray #666666
   font-size: 40px;
   letter-spacing: -1.68px;
   background-color: var(--msfg-blue);
+  background-image: url('/app_banner_schie.png');
+  background-size: cover;
+  background-position: center;
   color: var(--input-bg-color);
-  text-align: center;
+  text-align: left;
   font-family: sans-serif;
-  padding: 20px;
+  padding: 45px;
 }
-
 /* Navigation */
 
 .navbar {
