@@ -10,6 +10,9 @@ npi-backend/__pycache__/*
 npi-backend/*.pyc
 .venv/
 .env
+.env.*
 __pycache__/
 *.pyc
 npi-tracker-schema-partial.sql
+azurite-data/*
+azurite-data

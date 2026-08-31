@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.database import engine, get_db
 from app.data_operations import DataOperationsNewOrder, BuildDataIn
+from app.routers import builds, order_activation
 
 app = FastAPI(title="NPI Backend")
 
@@ -18,6 +19,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(builds.router)
+app.include_router(order_activation.router)
 
 
 data_ops = DataOperationsNewOrder()

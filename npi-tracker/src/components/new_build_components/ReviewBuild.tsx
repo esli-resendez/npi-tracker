@@ -1,5 +1,4 @@
 import {
-  Button,
   Card,
   Title2
 } from "@fluentui/react-components";
@@ -12,7 +11,9 @@ interface ReviewBuildProps {
 
 export default function ReviewBuild({
   buildData,
-  onSubmit
+  // Not called here -- create_new.tsx's own footer button drives submission.
+  // Kept in props for now in case this component later gets its own submit action.
+  onSubmit: _onSubmit
 }: ReviewBuildProps) {
 
   return (

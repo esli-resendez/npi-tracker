@@ -1,7 +1,5 @@
-export default function ActiveBuilds(){
-      return (
-      <h1>
-        This is the component for Active Builds!
-      </h1>
-  );
+import { Builds } from "../components/Builds/Builds";
+
+export default function ActiveBuilds() {
+  return <Builds />;
 }
