@@ -1,0 +1,47 @@
+Status of the tracking system when the user has completed the creation of a new order is that the order is in 'DRAFT' state
+User needs to input more information to move the order into 'ACTIVE'.
+
+1. Once the user has manually created a new order, the status of the order is 'DRAFT'
+2. I want to create a component called 'builds' which will present to the current user all builds in which they're linked
+This link between orders and users comes from the table dbo.oder_users which has 3 columns, order_id, user_id and role_id
+3. The component 'builds' will display a list using FluentUI, this list displays all orders with status 'ACTIVE' or 'DRAFT',
+the 'ACTIVE' orders will be only for display, but the 'DRAFT' orders should provide a button to finish the required information to move it to 'ACTIVE'
+
+
+Once the user clicks in the button to complete an order, the system must complete this processing:
+
+1. User needs to provide a BOM file that indicates which components will be in the rack
+2. System needs to read the RACK BOM and process this BOM file (excel file) and get this information: part number, revision, description and class
+3. System needs to insert the devices information into the device_types table. This table contains a column for part_number, revision, class and description. 
+All devices from a RACK must set the column 'dev_role' as 'TOP' to indicate they're a top component on the rack
+4. Once RACK BOM is processed, user needs to upload BUILDING_BLOCK BOM, which has the same structure as the RACK BOM
+5. Processing for BUILDING_BLOCK is almost the same, read excel file and insert the components but insert in a table called component_types. 
+The difference here will be that all components on this stage will have their 'dev_role' column set to 'SUB' to indicate they're a subcomponent of a top component 
+Having the same part number in device_types and component_types is allowed, but there must be a unique id for the combination of part_number and revision
+6. Now, system must relate the racks with the child devices via serial numbers. User must upload an excel file with the following structure:
+rack sn, device sn, device part_number, rack position. 
+7. System must get the device_type_id from the device_types using part_number from the excel file and the revision from the previously processed BOM, once device_type_id is retrieved
+insert the relationship on the table rack_positions, this table has the following colums: rack_id, position, device_id, device_type_id. The column device_id is NULL at the moment, 
+but the new row will generate a rack_position_id
+8. System must capture the relationship on the table devices_at_racks, this table holds the following columns: rack_position_id, device_type_id, part_number, serial_number, 
+created_at (this is a timestamp where we will capture when this entry was registered). Every entry will generate a device_id. Once this device_id is generated, add this into the rack_positions
+table 
+9. Similar logic applies to the relationship between devices and components
+10. User must upload an excel file with the following structure: device sn, component sn, component part_number, component role
+11. System must get component_type_id, device_id from previous step, serial number, part number and insert everything into 'device_components' table
+12. Once all this process is complete, user must pick a start date
+13. Once a start date is defined, table dbo.orders must update the 'start_date' field and 'ord_status' to ACTIVE
+
+From UI perspective
+
+1. Show a component to tell the user to upload a BOM file for the rack
+1.1 process the BOM file in the backend
+2. Show a component to tell the user to upload a BOM file for the BUILDING_BLOCK
+2.1 process the BUILDING_BLOCK component in the backend
+3. Show a component to tell the user to upload the rack-component serial numbers file. 
+It could be from 1 to 5 files depending on the number of unique 'rack_id' rows from the table dbo.order_racks 
+3.1 process the serial number files in the backend
+4. show a component to upload multiple files to process the serial number of components for each of the devices. The information could be on a single file or multiple files
+4.1 process the file in the backend
+5. Show the user to confirm start date
+6. show confirmation that the order is now active 
