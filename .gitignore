@@ -16,3 +16,4 @@ __pycache__/
 npi-tracker-schema-partial.sql
 azurite-data/*
 azurite-data
+activate-test.log
