@@ -9,7 +9,7 @@ def get_builds_for_user(db: Session, username: str):
                  FROM dbo.orders o
                  JOIN dbo.order_users ou ON ou.order_id = o.order_id
                  JOIN dbo.users u ON u.user_id = ou.user_id
-                 WHERE u.username = :username AND o.ord_status IN ('ACTIVE', 'DRAFT')
+                 WHERE u.username = :username AND o.ord_status IN ('ACTIVE', 'DRAFT', 'UNASIGNED', 'TESTPLAN')
                  ORDER BY o.created_at DESC"""),
         {"username": username},
     ).mappings().all()
