@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Button,
-  Dropdown,
-  Option,
   Field,
   Input,
   MessageBar,
@@ -29,6 +27,19 @@ const useStyles = makeStyles({
   root: { display: "flex", flexDirection: "column", gap: "16px", maxWidth: "640px" },
   entry: { display: "flex", gap: "8px", alignItems: "flex-end" },
   actions: { display: "flex", gap: "8px", marginTop: "8px" },
+  // Plain native <select>, styled to roughly match Fluent's input sizing --
+  // Fluent v9's Dropdown/Option pairing crashes in this project's dev setup
+  // (portal positioning + Fast Refresh), same reason StartDateStep.tsx uses
+  // a native <input type="date"> instead of Fluent's DatePicker.
+  roleSelect: {
+    height: "32px",
+    padding: "0 8px",
+    borderRadius: "4px",
+    border: "1px solid #d1d1d1",
+    fontFamily: "inherit",
+    fontSize: "14px",
+    minWidth: "180px",
+  },
 });
 
 // A row in the form. Existing members carry a user_id from the server;
@@ -158,18 +169,20 @@ export function TeamAssignmentPanel({
             <TableRow key={row.rowKey}>
               <TableCell>{row.email}</TableCell>
               <TableCell>
-                <Dropdown
-                  placeholder="Select role"
+                <select
+                  className={styles.roleSelect}
                   value={row.role_name ?? ""}
-                  selectedOptions={row.role_name ? [row.role_name] : []}
-                  onOptionSelect={(_, data) => updateRowRole(row.rowKey, data.optionValue ?? null)}
+                  onChange={(e) => updateRowRole(row.rowKey, e.target.value || null)}
                 >
+                  <option value="" disabled>
+                    Select role
+                  </option>
                   {roles.map((r) => (
-                    <Option key={r.role_name} value={r.role_name}>
+                    <option key={r.role_name} value={r.role_name}>
                       {r.role_name}
-                    </Option>
+                    </option>
                   ))}
-                </Dropdown>
+                </select>
               </TableCell>
               <TableCell>
                 <Button size="small" appearance="subtle" onClick={() => removeRow(row.rowKey)}>
