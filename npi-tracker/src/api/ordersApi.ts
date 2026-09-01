@@ -1,7 +1,7 @@
 export interface Build {
   order_id: number;
   order_number: string;
-  ord_status: "ACTIVE" | "DRAFT";
+  ord_status: "ACTIVE" | "DRAFT" | "UNASIGNED" | "TESTPLAN";
   progress: number;
   start_date: string | null;
 }
@@ -11,6 +11,25 @@ export interface OrderRack {
   rack_serial: string;
   rack_sku: string;
   rack_sequence: number;
+}
+
+// Team assignment types
+export interface RoleOption {
+  role_id: number;
+  role_name: string;
+}
+
+export interface OrderMember {
+  user_id: number;
+  email: string;
+  display_name: string | null;
+  role_id: number;
+  role_name: string;
+}
+
+export interface MemberRoleAssignment {
+  email: string;
+  role_name: string;
 }
 
 // Matches the convention already used in main_pages/create_new.tsx --
@@ -69,5 +88,36 @@ export async function startOrder(orderId: number, startDate: string) {
     body: JSON.stringify({ start_date: startDate }),
   });
   if (!res.ok) throw new Error("Failed to activate order");
+  return res.json();
+}
+
+// Functions for the team role assignment
+
+export async function getAssignableRoles(orderId: number): Promise<RoleOption[]> {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}/team/roles`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to load assignable roles");
+  return res.json();
+}
+
+export async function getOrderTeam(orderId: number): Promise<OrderMember[]> {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}/team`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to load order team");
+  return res.json();
+}
+
+export async function assignTeamRoles(
+  orderId: number,
+  members: MemberRoleAssignment[]
+): Promise<{ order_id: number; ord_status: string }> {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}/team`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ members }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ? String(body.detail) : "Failed to assign roles");
+  }
   return res.json();
 }

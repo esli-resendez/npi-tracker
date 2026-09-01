@@ -1,0 +1,35 @@
+From the existing system, the new feature will be assigning the roles of the team
+
+The 'active_builds' component calls for the '../components/Builds/Builds' component, which will display a list of 'DRAFT' and 'ACTIVE' orders
+I want to modify this component to display also orders in the following status: 'UNASIGNED', 'TESTPLAN'.
+These are the two new steps that need to be completed before an order moves into the state of 'ACTIVE'
+
+Keep in mind, the order might have 3 different status: 'DRAFT', 'UNASIGNED', 'TESTPLAN' 
+
+If the order is in 'DRAFT', the order will display a button, when the user clicks the button
+the '../OrderActivation/OrderActivationWizard' component will display, and the user must input the BOM and serial number relationship, and define project members.
+If all data is correct, the backend will move the order into 'UNASIGNED' status. This feature is already complete both in the UI and backend. 
+
+I want to create the next step which is moving the order from 'UNASIGNED' into 'TESTPLAN'
+To do so, any order that is related to the user via their email will show in a list, with a button to 'assign'.
+Right now we have a hardcoded email to simulate user credentials, keep it that way. 
+The same logic that was implemented to move the order from 'DRAFT' to 'UNASIGNED'. 
+When a user clicks the button, a new component will display, in this component the user will be presented with a list of members already assigned to the order
+User must select from a dropbox the correct role for each of the members associated to the order. 
+
+For this, we need to pull data from the database. 
+We need first to pre-populate the component with a list of existing members and their current role
+There is a table called 'dbo.order_users' where we have order_id, user_id and role_id
+
+For the dropbox, the user must select only from the available roles in the table dbo.roles. 
+The table dbo.roles has the following columns: role_id and role_name. 
+The UI must present in a combo box the role_name
+There is a role_name = 'ADMIN', this role should not be displayed as an option for the user.
+
+The UI component must provide also the option to add more members and their corresponding role
+
+Once all roles are populated, user can assign the roles. The table dbo.order_users is updated to handle the relationship of the role_id and role_name
+Finally the order status changes from 'UNASIGNED' to 'TESTPLAN'
+
+Show the components with the correct folder structure and what modifications do I need to do for the existing components
+
