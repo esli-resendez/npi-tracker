@@ -28,10 +28,10 @@ def get_order_racks(db: Session, order_id: int):
     return [dict(row) for row in rows]
 
 
-def activate_order(db: Session, order_id: int, start_date: date) -> None:
+def order_to_assign(db: Session, order_id: int, start_date: date) -> None:
     result = db.execute(
         text("""UPDATE dbo.orders
-                 SET start_date = :start_date, ord_status = 'ACTIVE', updated_at = SYSUTCDATETIME()
+                 SET start_date = :start_date, ord_status = 'UNASSIGNED', updated_at = SYSUTCDATETIME()
                  WHERE order_id = :order_id AND ord_status = 'DRAFT'"""),
         {"start_date": start_date, "order_id": order_id},
     )

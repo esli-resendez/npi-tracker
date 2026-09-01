@@ -51,15 +51,15 @@ def upsert_component_type(db: Session, part_number: str, revision: str, descript
             text("""UPDATE dbo.component_types
                      SET name = :name, class = :cls, dev_role = 'SUB'
                      WHERE component_type_id = :component_type_id"""),
-            {"name": description, "cls": cls, "component_type_id": existing},
+            {"description": description, "cls": cls, "component_type_id": existing},
         )
         return existing
 
     return db.execute(
-        text("""INSERT INTO dbo.component_types (name, part_number, revision, class, dev_role)
+        text("""INSERT INTO dbo.component_types (description, part_number, revision, class, dev_role)
                  OUTPUT INSERTED.component_type_id
-                 VALUES (:name, :part_number, :revision, :cls, 'SUB')"""),
-        {"name": description, "part_number": part_number, "revision": revision, "cls": cls},
+                 VALUES (:description, :part_number, :revision, :cls, 'SUB')"""),
+        {"description": description, "part_number": part_number, "revision": revision, "cls": cls},
     ).scalar()
 
 

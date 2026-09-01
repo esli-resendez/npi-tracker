@@ -158,9 +158,9 @@ class StartDateRequest(BaseModel):
 @router.post("/start")
 def start_order(order_id: int, body: StartDateRequest, db: Session = Depends(get_db)):
     try:
-        order_repository.activate_order(db, order_id, body.start_date)
+        order_repository.order_to_assign(db, order_id, body.start_date)
         db.commit()
     except ValueError as e:
         db.rollback()
         raise HTTPException(status_code=409, detail=str(e))
-    return {"order_id": order_id, "ord_status": "ACTIVE", "start_date": body.start_date}
+    return {"order_id": order_id, "ord_status": "UNASIGNED", "start_date": body.start_date}

@@ -94,6 +94,41 @@ class DataOperationsNewOrder:
 
         return order_id
 
+
+    def get_or_create_rack(self, db: Session, rack_sku: str, rack_gen_name: str, rack_serial: str) -> int:
+        # UPDLOCK+HOLDLOCK closes the race window: it takes a range lock on the
+        # (nonexistent) key so a concurrent request can't slip an INSERT in
+        # between this SELECT and ours.
+        existing = db.execute(
+            text("""
+                SELECT rack_id FROM dbo.racks WITH (UPDLOCK, HOLDLOCK)
+                WHERE rack_serial = :rack_serial
+            """),
+            {"rack_serial": rack_serial}
+        ).scalar()
+
+        if existing is not None:
+            return existing
+
+        try:
+            return db.execute(
+                text("""
+                    INSERT INTO dbo.racks (rack_sku, rack_gen_name, rack_serial)
+                    OUTPUT INSERTED.rack_id
+                    VALUES (:rack_sku, :rack_gen_name, :rack_serial)
+                """),
+                {"rack_sku": rack_sku, "rack_gen_name": rack_gen_name, "rack_serial": rack_serial}
+            ).scalar()
+        except IntegrityError:
+            # Belt-and-suspenders: if two txns still raced past the lock somehow,
+            # fall back to the row the other one committed.
+            db.rollback()
+            return db.execute(
+                text("SELECT rack_id FROM dbo.racks WHERE rack_serial = :rack_serial"),
+                {"rack_serial": rack_serial}
+            ).scalar()
+
+
     def create_rack(self, db: Session, rack_sku: str, rack_gen_name: str, rack_serial: str) -> int:
         return db.execute(
             text("""
@@ -109,11 +144,20 @@ class DataOperationsNewOrder:
         ).scalar()
 
     def link_rack_to_order(self, db: Session, order_id: int, rack_id: int, sequence: int) -> None:
+        already_linked = db.execute(
+            text("SELECT 1 FROM dbo.order_racks WHERE order_id = :order_id AND rack_id = :rack_id"),
+            {"order_id": order_id, "rack_id": rack_id}
+        ).scalar()
+
+        if already_linked:
+            raise HTTPException(
+                status_code=650,
+                detail=f"Rack (SN {rack_id}) is already linked to this order"
+            )
+
         db.execute(
-            text("""
-                INSERT INTO order_racks (order_id, rack_id, rack_sequence)
-                VALUES (:order_id, :rack_id, :sequence)
-            """),
+            text("""INSERT INTO dbo.order_racks (order_id, rack_id, rack_sequence)
+                    VALUES (:order_id, :rack_id, :sequence)"""),
             {"order_id": order_id, "rack_id": rack_id, "sequence": sequence}
         )
 
@@ -176,6 +220,10 @@ class DataOperationsNewOrder:
                     f"number of racks submitted ({len(build_data.racks)})"
                 )
             )
+        # Safety check, only unique rack serials per order
+        serials = [r.rackSerial for r in build_data.racks]
+        if len(serials) != len(set(serials)):
+            raise HTTPException(status_code=667, detail="Duplicate rack serial numbers in submission")
 
         try:
             crd_id = self.get_or_create_crd(db, order_details.crdNumber)
@@ -185,7 +233,7 @@ class DataOperationsNewOrder:
             order_id = self.create_order(db, crd_version_id, order_details.buildStage)
 
             for sequence, rack in enumerate(build_data.racks, start=1):
-                rack_id = self.create_rack(
+                rack_id = self.get_or_create_rack(
                     db,
                     order_details.rackSku,
                     order_details.rackGenName,
