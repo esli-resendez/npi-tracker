@@ -11,14 +11,18 @@ import {
 } from "@fluentui/react-components";
 import { getBuilds, type Build } from "../../api/ordersApi";
 import { OrderActivationWizard } from "../OrderActivation/OrderActivationWizard";
+import { TeamAssignmentPanel } from "../TeamAssignment/TeamAssignmentPanel";
 
 export function Builds() {
   const [builds, setBuilds] = useState<Build[]>([]);
   const [loading, setLoading] = useState(true);
   const [activatingOrderId, setActivatingOrderId] = useState<number | null>(null);
+  const [assigningOrderId, setAssigningOrderId] = useState<number | null>(null);
+
+  const refreshBuilds = () => getBuilds().then(setBuilds);
 
   useEffect(() => {
-    getBuilds().then(setBuilds).finally(() => setLoading(false));
+    refreshBuilds().finally(() => setLoading(false));
   }, []);
 
   if (activatingOrderId) {
@@ -28,7 +32,20 @@ export function Builds() {
         onClose={() => setActivatingOrderId(null)}
         onCompleted={() => {
           setActivatingOrderId(null);
-          getBuilds().then(setBuilds);
+          refreshBuilds();
+        }}
+      />
+    );
+  }
+
+  if (assigningOrderId) {
+    return (
+      <TeamAssignmentPanel
+        orderId={assigningOrderId}
+        onCancel={() => setAssigningOrderId(null)}
+        onAssigned={() => {
+          setAssigningOrderId(null);
+          refreshBuilds();
         }}
       />
     );
@@ -56,6 +73,11 @@ export function Builds() {
               {item.ord_status === "DRAFT" && (
                 <Button appearance="primary" onClick={() => setActivatingOrderId(item.order_id)}>
                   Complete order
+                </Button>
+              )}
+              {item.ord_status === "UNASIGNED" && (
+                <Button appearance="primary" onClick={() => setAssigningOrderId(item.order_id)}>
+                  Assign roles
                 </Button>
               )}
             </TableCell>
