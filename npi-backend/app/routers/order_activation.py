@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.repositories import catalog_repository, component_repository, order_repository, rack_repository
+from app.repositories import catalog_repository, component_repository, order_repository, rack_repository, test_repository
 from app.services.blob_storage import blob_storage_service
 from app.services.excel_parser import parse_rows
 
@@ -164,3 +164,7 @@ def start_order(order_id: int, body: StartDateRequest, db: Session = Depends(get
         db.rollback()
         raise HTTPException(status_code=409, detail=str(e))
     return {"order_id": order_id, "ord_status": "UNASIGNED", "start_date": body.start_date}
+
+@router.get("/available-test-plans")
+def available_test_plans(order_id: int, db: Session = Depends(get_db)):
+    return test_repository.get_available_test_plans_for_order(db, order_id)

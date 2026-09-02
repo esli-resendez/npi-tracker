@@ -79,6 +79,14 @@ export default function OrderDetailsStep({
       />
 
       <FormField
+      label="Building Block"
+      field="buildingBlock"
+      value={buildData.orderDetails.buildingBlock}
+      maxlen={20}
+      onChange={updateBuildData}
+      />
+
+      <FormField
       label="CRD DOC SKU"
       field="crdNumber"
       value={buildData.orderDetails.crdNumber}
