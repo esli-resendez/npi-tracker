@@ -3,6 +3,7 @@ export interface OrderDetails {
     buildId: string;
     rackSku: string;
     rackGenName: string;
+    buildingBlock:string;
     crdNumber: string;
     crdRevision: string;
     buildStage: string;
@@ -30,6 +31,7 @@ BuildData = {
         buildId: "",
         rackSku: "",
         rackGenName: "",
+        buildingBlock: "",
         crdNumber: "",
         crdRevision: "",
         buildStage: "",

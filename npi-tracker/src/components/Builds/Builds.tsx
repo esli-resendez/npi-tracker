@@ -12,12 +12,14 @@ import {
 import { getBuilds, type Build } from "../../api/ordersApi";
 import { OrderActivationWizard } from "../OrderActivation/OrderActivationWizard";
 import { TeamAssignmentPanel } from "../TeamAssignment/TeamAssignmentPanel";
+import { TestPlanWizard } from "../TestPlan/TestPlanWizard";
 
 export function Builds() {
   const [builds, setBuilds] = useState<Build[]>([]);
   const [loading, setLoading] = useState(true);
   const [activatingOrderId, setActivatingOrderId] = useState<number | null>(null);
   const [assigningOrderId, setAssigningOrderId] = useState<number | null>(null);
+  const [testPlanOrderId, setTestPlanOrderId] = useState<number | null>(null);
 
   const refreshBuilds = () => getBuilds().then(setBuilds);
 
@@ -51,6 +53,19 @@ export function Builds() {
     );
   }
 
+  if (testPlanOrderId) {
+    return (
+      <TestPlanWizard
+        orderId={testPlanOrderId}
+        onClose={() => setTestPlanOrderId(null)}
+        onCompleted={() => {
+          setTestPlanOrderId(null);
+          refreshBuilds();
+        }}
+      />
+    );
+  }
+
   if (loading) return <Spinner label="Loading builds..." />;
 
   return (
@@ -78,6 +93,11 @@ export function Builds() {
               {item.ord_status === "UNASIGNED" && (
                 <Button appearance="primary" onClick={() => setAssigningOrderId(item.order_id)}>
                   Assign roles
+                </Button>
+              )}
+              {item.ord_status === "TESTPLAN" && (
+                <Button appearance="primary" onClick={() => setTestPlanOrderId(item.order_id)}>
+                  Define test plan
                 </Button>
               )}
             </TableCell>
