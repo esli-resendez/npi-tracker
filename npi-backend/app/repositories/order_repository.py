@@ -31,9 +31,23 @@ def get_order_racks(db: Session, order_id: int):
 def order_to_assign(db: Session, order_id: int, start_date: date) -> None:
     result = db.execute(
         text("""UPDATE dbo.orders
-                 SET start_date = :start_date, ord_status = 'UNASSIGNED', updated_at = SYSUTCDATETIME()
+                 SET start_date = :start_date, ord_status = 'UNASIGNED', updated_at = SYSUTCDATETIME()
                  WHERE order_id = :order_id AND ord_status = 'DRAFT'"""),
         {"start_date": start_date, "order_id": order_id},
     )
     if result.rowcount == 0:
-        raise ValueError(f"Order {order_id} was not activated -- it may not exist or is not in DRAFT status")
+        raise ValueError(f"Order {order_id} was not moved to UNASIGNED -- it may not exist or is not in DRAFT status")
+
+
+def move_to_active(db: Session, order_id: int) -> None:
+    """TESTPLAN -> ACTIVE. Called once a test plan has been assigned to the
+    order -- no additional date capture here since start_date is already
+    set back when the order left DRAFT."""
+    result = db.execute(
+        text("""UPDATE dbo.orders
+                 SET ord_status = 'ACTIVE', updated_at = SYSUTCDATETIME()
+                 WHERE order_id = :order_id AND ord_status = 'TESTPLAN'"""),
+        {"order_id": order_id},
+    )
+    if result.rowcount == 0:
+        raise ValueError(f"Order {order_id} was not activated -- it may not exist or is not in TESTPLAN status")

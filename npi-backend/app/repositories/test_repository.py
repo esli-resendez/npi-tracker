@@ -84,3 +84,34 @@ def assign_plan_to_order(db: Session, order_id: int, test_plan_id: int) -> None:
                      VALUES (:order_id, :test_plan_id)"""),
             {"order_id": order_id, "test_plan_id": test_plan_id},
         )
+
+
+def get_available_test_plans_for_order(db: Session, order_id: int) -> list[dict]:
+    """Finds test plans previously used on *other* orders that share this
+    order's rack SKU. Since an order has one rack SKU (possibly across
+    multiple rack rows), we pull the SKU from any of its racks."""
+    rows = db.execute(
+        text("""
+            SELECT DISTINCT tp.test_plan_id, tp.test_plan_name, tp.test_plan_description
+            FROM dbo.order_racks orck_self
+            JOIN dbo.racks r_self ON r_self.rack_id = orck_self.rack_id
+            JOIN dbo.racks r_other ON r_other.rack_sku = r_self.rack_sku
+            JOIN dbo.order_racks orck_other ON orck_other.rack_id = r_other.rack_id
+            JOIN dbo.order_test_plan otp ON otp.order_id = orck_other.order_id
+            JOIN dbo.test_plans tp ON tp.test_plan_id = otp.test_plan_id
+            WHERE orck_self.order_id = :order_id
+              AND orck_other.order_id != :order_id
+            ORDER BY tp.test_plan_name
+        """),
+        {"order_id": order_id},
+    ).mappings().all()
+    return [dict(row) for row in rows]
+
+# test_repository.py
+def create_test_plan(db: Session, test_plan_name: str, test_plan_description: Optional[str]) -> int:
+    return db.execute(
+        text("""INSERT INTO dbo.test_plans (test_plan_name, test_plan_description)
+                 OUTPUT INSERTED.test_plan_id
+                 VALUES (:name, :description)"""),
+        {"name": test_plan_name, "description": test_plan_description},
+    ).scalar()

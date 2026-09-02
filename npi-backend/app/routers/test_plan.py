@@ -1,16 +1,23 @@
 from datetime import date
+from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.repositories import test_repository
+from app.repositories import order_repository, test_repository
 from app.services.blob_storage import blob_storage_service
 from app.services.excel_parser import parse_rows
 
+# test_plan.py router
+class TestPlanCreate(BaseModel):
+    test_plan_name: str
+    test_plan_description: Optional[str] = None
+
 router = APIRouter(prefix="/api/test-plans", tags=["test-plans"])
 TEST_PLAN_HEADERS = ["order", "test_name", "test_description", "test_level", "duration"]
+
 
 
 @router.post("/{test_plan_id}/cases")
@@ -92,9 +99,20 @@ async def upload_test_plan_cases(
 def assign_test_plan(test_plan_id: int, order_id: int, db: Session = Depends(get_db)):
     try:
         test_repository.assign_plan_to_order(db, order_id, test_plan_id)
+        order_repository.move_to_active(db, order_id)
         db.commit()
+    except ValueError as e:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(e))
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to assign test plan: {e}")
 
-    return {"order_id": order_id, "test_plan_id": test_plan_id}
+    return {"order_id": order_id, "test_plan_id": test_plan_id, "ord_status": "ACTIVE"}
+
+
+@router.post("")
+def create_test_plan(body: TestPlanCreate, db: Session = Depends(get_db)):
+    test_plan_id = test_repository.create_test_plan(db, body.test_plan_name, body.test_plan_description)
+    db.commit()
+    return {"test_plan_id": test_plan_id}
