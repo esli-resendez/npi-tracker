@@ -1,0 +1,42 @@
+I need the system to do the following:
+
+The user can see all orders assigned to them, and each order has a different state from the mentioned 
+'DRAFT', 'UNASIGNED', 'TESTPLAN' and ACTIVE
+
+Right now, ACTIVE does not have a button, and I want to add one.
+
+In this case, when the button is pressed, the user will see details about that order:
+It has to have the following information:
+
+There is one tab or page that shows 'Description' data:
+    Details of the order: Rack SKU, Rack generic description, CRD number, CRD description, CRD ID, stage
+    These details come from the dbo.orders table but it will also require getting the relation from the order_racks
+    Refer to my SQL schema for the relationships needed  
+
+There is one tab/page that shows 'Team Roster':
+    List of users asisgned to the order and their role. I want to display the name of the display_name instead of the email. 
+    This information can be found in table dbo.users on the column 'display_name'. I want an option to be able to add new team members in this tab
+    One button that can directly assign more team members to the order without any changes to the order status
+
+There is one tab that shows the expanded serial number relationship, we can call it 'BOM'
+    This is a list of the serial numbers of the rack, but when user clicks, it expands on more rows showing all serial numbers and their part number associated to this rack, and this order
+
+There is one tab that shows the 'Test Plan' 
+    This list will display on top a single row with the Test plan name, and Test plan description related to this order
+    Below, there is a list with the following: Test Case Name, Description, Level and Duration. This information is obtained from the test_cases table 
+    (fields are test_name, test_description, test_level and duration_minutes)
+    The test plan will normally have two types of 'test_level', either L10 or L11. Still I want to implement logic to sum the duration for each of the available test levels
+    and put that in a bottom row on each level that says 'Test Duration'
+
+Finally there is a tab with the name 'Build Log' 
+    This basically displays a log of all events that happened to this order. Leave this as a placeholder for now
+    But in the future, I will enable a table in my schema called dbo.log_order which will have order_id, event_type, event_date, log_text
+    I want to show the user a table to display the summary of timestamp, event_type and log text. Ideally with capacity to sort by event type and by date 
+
+For the UI, since I already have a navigation panel in the top, I am thinking on having tab navigation in the bottom for this component, because I want the user to be able
+to go to any of these stages at any given point. These are mostly to display information and user should not need to navigate step by step as wizard
+But any navigation type works for me, either tabs at the right or left side, or in the bottom. Let's try with FluentUI to look consistent
+
+Since I haven't done any changes to the backend yet, you can decide how to name the queries and functions. 
+
+So far we have hardcoded the username to the same email, I'll keep that logic for now

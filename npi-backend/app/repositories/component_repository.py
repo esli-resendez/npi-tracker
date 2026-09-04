@@ -33,6 +33,21 @@ def get_component_type_id_for_order(db: Session, order_id: int, part_number: str
     return rows[0][0]
 
 
+def get_components_for_device(db: Session, device_id: int) -> list[dict]:
+    """Powers the second level of expansion in the 'BOM' tab: sub-components
+    installed on a given device, with the friendly name from component_types."""
+    rows = db.execute(
+        text("""SELECT dc.component_id, dc.serial_number, dc.part_number, dc.component_role,
+                        ct.name AS component_name
+                 FROM dbo.device_components dc
+                 JOIN dbo.component_types ct ON ct.component_type_id = dc.component_type_id
+                 WHERE dc.device_id = :device_id
+                 ORDER BY dc.component_id"""),
+        {"device_id": device_id},
+    ).mappings().all()
+    return [dict(row) for row in rows]
+
+
 def insert_device_component(
     db: Session,
     device_id: int,
