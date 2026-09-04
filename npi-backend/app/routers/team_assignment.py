@@ -77,3 +77,36 @@ def assign_roles(order_id: int, body: AssignRolesIn, db: Session = Depends(get_d
         raise HTTPException(status_code=500, detail="Failed to assign roles")
 
     return {"order_id": order_id, "ord_status": "TESTPLAN"}
+
+
+@router.post("/members")
+def add_team_members(order_id: int, body: AssignRolesIn, db: Session = Depends(get_db)):
+    """Same upsert-by-email logic as POST /team, but for the order detail
+    screen's Team Roster tab: members can be added/re-roled on an order at
+    any point (including once it's ACTIVE) without moving ord_status."""
+    if not body.members:
+        raise HTTPException(status_code=400, detail="At least one member/role is required")
+
+    try:
+        for member in body.members:
+            role_id = team_repository.get_assignable_role_id(db, member.role_name)
+            if role_id is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"'{member.role_name}' is not a valid assignable role"
+                )
+
+            user_id = team_repository.get_or_create_user(db, member.email)
+            team_repository.upsert_order_member_role(db, order_id, user_id, role_id)
+
+        db.commit()
+
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as e:
+        db.rollback()
+        print(f"Exception raised: {e}")
+        raise HTTPException(status_code=500, detail="Failed to add team members")
+
+    return {"order_id": order_id}

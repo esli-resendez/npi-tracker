@@ -10,6 +10,7 @@ export interface OrderRack {
   rack_id: number;
   rack_serial: string;
   rack_sku: string;
+  rack_gen_name: string | null;
   rack_sequence: number;
 }
 
@@ -37,6 +38,60 @@ export interface AvailableTestPlan {
   test_plan_id: number;
   test_plan_name: string;
   test_plan_description: string | null;
+}
+
+// Order detail view types (Description / BOM / Test Plan / Build Log tabs)
+
+export interface OrderOverview {
+  order_id: number;
+  order_number: string;
+  stage: string;
+  ord_status: string;
+  progress: number;
+  start_date: string | null;
+  end_date: string | null;
+  crd_version_id: number | null;
+  crd_revision: string | null;
+  crd_id: number | null;
+  crd_number: string | null;
+  crd_name: string | null;
+}
+
+export interface RackDevice {
+  device_id: number;
+  serial_number: string | null;
+  part_number: string | null;
+  position: number;
+  device_description: string | null;
+}
+
+export interface DeviceComponent {
+  component_id: number;
+  serial_number: string | null;
+  part_number: string | null;
+  component_role: string | null;
+  component_name: string | null;
+}
+
+export interface TestPlanCase {
+  test_case_id: number;
+  test_name: string;
+  test_description: string | null;
+  test_level: string;
+  duration_minutes: number | null;
+  sequence: number | null;
+}
+
+export interface OrderTestPlanOverview {
+  test_plan: { test_plan_id: number; test_plan_name: string; test_plan_description: string | null } | null;
+  test_cases: TestPlanCase[];
+  duration_by_level: Record<string, number>;
+}
+
+export interface OrderLogEntry {
+  event_date: string;
+  event_type: string;
+  log_text: string;
 }
 
 // Matches the convention already used in main_pages/create_new.tsx --
@@ -158,6 +213,62 @@ export async function createTestPlan(
 
 export const uploadTestPlanCases = (testPlanId: number, file: File) =>
   uploadFile(`${BASE_URL}/test-plans/${testPlanId}/cases`, file);
+
+// Order detail view calls
+
+export async function getOrderOverview(orderId: number): Promise<OrderOverview> {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to load order details");
+  return res.json();
+}
+
+export async function getRackDevices(orderId: number, rackId: number): Promise<RackDevice[]> {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}/bom/racks/${rackId}/devices`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to load rack devices");
+  return res.json();
+}
+
+export async function getDeviceComponents(orderId: number, deviceId: number): Promise<DeviceComponent[]> {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}/bom/devices/${deviceId}/components`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Failed to load device components");
+  return res.json();
+}
+
+export async function getOrderTestPlan(orderId: number): Promise<OrderTestPlanOverview> {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}/test-plan`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to load test plan");
+  return res.json();
+}
+
+export async function getOrderLog(orderId: number): Promise<OrderLogEntry[]> {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}/log`, { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to load build log");
+  return res.json();
+}
+
+// Adds/re-roles team members on an order without touching ord_status --
+// used from the order detail screen's Team Roster tab. Distinct from
+// assignTeamRoles(), which is the UNASIGNED -> TESTPLAN workflow step.
+export async function addTeamMembers(
+  orderId: number,
+  members: MemberRoleAssignment[]
+): Promise<{ order_id: number }> {
+  const res = await fetch(`${BASE_URL}/orders/${orderId}/team/members`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ members }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.detail ? String(body.detail) : "Failed to add team members");
+  }
+  return res.json();
+}
 
 export async function assignTestPlan(testPlanId: number, orderId: number) {
   const res = await fetch(`${BASE_URL}/test-plans/${testPlanId}/assign/${orderId}`, {

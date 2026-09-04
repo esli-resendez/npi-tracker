@@ -30,6 +30,23 @@ def get_device_type_id_for_order(db: Session, order_id: int, part_number: str) -
     return rows[0][0]
 
 
+def get_devices_for_rack(db: Session, rack_id: int) -> list[dict]:
+    """Powers the expandable 'BOM' tab: top-level devices installed at a
+    rack's positions, with their serial/part number and the friendly
+    description from device_types."""
+    rows = db.execute(
+        text("""SELECT dar.device_id, dar.serial_number, dar.part_number,
+                        rp.position, dt.description AS device_description
+                 FROM dbo.devices_at_racks dar
+                 JOIN dbo.rack_positions rp ON rp.rack_position_id = dar.rack_position_id
+                 JOIN dbo.device_types dt ON dt.device_type_id = dar.device_type_id
+                 WHERE rp.rack_id = :rack_id
+                 ORDER BY rp.position"""),
+        {"rack_id": rack_id},
+    ).mappings().all()
+    return [dict(row) for row in rows]
+
+
 def insert_rack_position(db: Session, rack_id: int, position: int, device_type_id: int) -> int:
     return db.execute(
         text("""INSERT INTO dbo.rack_positions (rack_id, position, device_type_id)

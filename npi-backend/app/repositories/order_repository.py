@@ -16,6 +16,27 @@ def get_builds_for_user(db: Session, username: str):
     return [dict(row) for row in rows]
 
 
+def get_order_summary(db: Session, order_id: int):
+    """Powers the 'Description' tab of the order detail view: order-level
+    fields plus the CRD it was built against (via crd_versions -> crds).
+    Rack-level detail (SKU, generic name, serials) is intentionally left out
+    here -- an order can have several racks via order_racks, so the frontend
+    fetches those separately with get_order_racks and lists them."""
+    row = db.execute(
+        text("""SELECT
+                    o.order_id, o.order_number, o.stage, o.ord_status, o.progress,
+                    o.start_date, o.end_date,
+                    cv.crd_version_id, cv.crd_revision,
+                    c.crd_id, c.crd_number, c.crd_name
+                 FROM dbo.orders o
+                 LEFT JOIN dbo.crd_versions cv ON cv.crd_version_id = o.crd_version_id
+                 LEFT JOIN dbo.crds c ON c.crd_id = cv.crd_id
+                 WHERE o.order_id = :order_id"""),
+        {"order_id": order_id},
+    ).mappings().first()
+    return dict(row) if row else None
+
+
 def get_order_racks(db: Session, order_id: int):
     rows = db.execute(
         text("""SELECT r.rack_id, r.rack_serial, r.rack_sku, r.rack_gen_name, orck.rack_sequence

@@ -107,6 +107,32 @@ def get_available_test_plans_for_order(db: Session, order_id: int) -> list[dict]
     ).mappings().all()
     return [dict(row) for row in rows]
 
+def get_test_plan_for_order(db: Session, order_id: int) -> Optional[dict]:
+    """The plan currently assigned to this order (order_test_plan is a
+    one-plan-per-order relationship -- see assign_plan_to_order)."""
+    row = db.execute(
+        text("""SELECT tp.test_plan_id, tp.test_plan_name, tp.test_plan_description
+                 FROM dbo.order_test_plan otp
+                 JOIN dbo.test_plans tp ON tp.test_plan_id = otp.test_plan_id
+                 WHERE otp.order_id = :order_id"""),
+        {"order_id": order_id},
+    ).mappings().first()
+    return dict(row) if row else None
+
+
+def get_test_cases_for_plan(db: Session, test_plan_id: int) -> list[dict]:
+    rows = db.execute(
+        text("""SELECT tc.test_case_id, tc.test_name, tc.test_description,
+                        tc.test_level, tc.duration_minutes, tpc.sequence
+                 FROM dbo.test_plan_cases tpc
+                 JOIN dbo.test_cases tc ON tc.test_case_id = tpc.test_case_id
+                 WHERE tpc.test_plan_id = :test_plan_id
+                 ORDER BY tpc.sequence"""),
+        {"test_plan_id": test_plan_id},
+    ).mappings().all()
+    return [dict(row) for row in rows]
+
+
 # test_repository.py
 def create_test_plan(db: Session, test_plan_name: str, test_plan_description: Optional[str]) -> int:
     return db.execute(
