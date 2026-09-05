@@ -32,19 +32,33 @@ def get_device_type_id_for_order(db: Session, order_id: int, part_number: str) -
 
 def get_devices_for_rack(db: Session, rack_id: int) -> list[dict]:
     """Powers the expandable 'BOM' tab: top-level devices installed at a
-    rack's positions, with their serial/part number and the friendly
-    description from device_types."""
+    rack's positions, with their serial/part number, the friendly
+    description from device_types, and the latest test result recorded
+    against them (or UNTESTED if device_process_history has no rows yet)."""
     rows = db.execute(
         text("""SELECT dar.device_id, dar.serial_number, dar.part_number,
-                        rp.position, dt.description AS device_description
+                        rp.position, dt.description AS device_description,
+                        latest.process_result AS latest_status
                  FROM dbo.devices_at_racks dar
                  JOIN dbo.rack_positions rp ON rp.rack_position_id = dar.rack_position_id
                  JOIN dbo.device_types dt ON dt.device_type_id = dar.device_type_id
+                 OUTER APPLY (
+                     SELECT TOP 1 dph.process_result
+                     FROM dbo.device_process_history dph
+                     WHERE dph.device_id = dar.device_id
+                     ORDER BY dph.started_at DESC, dph.device_process_history_id DESC
+                 ) latest
                  WHERE rp.rack_id = :rack_id
                  ORDER BY rp.position"""),
         {"rack_id": rack_id},
     ).mappings().all()
-    return [dict(row) for row in rows]
+
+    results = []
+    for row in rows:
+        row_dict = dict(row)
+        row_dict["status"] = row_dict.pop("latest_status") or "UNTESTED"
+        results.append(row_dict)
+    return results
 
 
 def insert_rack_position(db: Session, rack_id: int, position: int, device_type_id: int) -> int:

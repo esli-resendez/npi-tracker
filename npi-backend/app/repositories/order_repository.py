@@ -39,14 +39,29 @@ def get_order_summary(db: Session, order_id: int):
 
 def get_order_racks(db: Session, order_id: int):
     rows = db.execute(
-        text("""SELECT r.rack_id, r.rack_serial, r.rack_sku, r.rack_gen_name, orck.rack_sequence
+        text("""SELECT r.rack_id, r.rack_serial, r.rack_sku, r.rack_gen_name, orck.rack_sequence,
+                        latest.process_result AS latest_status
                  FROM dbo.racks r
                  JOIN dbo.order_racks orck ON orck.rack_id = r.rack_id
+                 OUTER APPLY (
+                     SELECT TOP 1 rph.process_result
+                     FROM dbo.rack_process_history rph
+                     WHERE rph.rack_id = r.rack_id
+                     ORDER BY rph.started_at DESC, rph.rack_process_history_id DESC
+                 ) latest
                  WHERE orck.order_id = :order_id
                  ORDER BY orck.rack_sequence"""),
         {"order_id": order_id},
     ).mappings().all()
-    return [dict(row) for row in rows]
+
+    # UNTESTED is a UI-level concept, not something stored in the DB -- a
+    # rack simply has no rack_process_history row yet.
+    results = []
+    for row in rows:
+        row_dict = dict(row)
+        row_dict["status"] = row_dict.pop("latest_status") or "UNTESTED"
+        results.append(row_dict)
+    return results
 
 
 def order_to_assign(db: Session, order_id: int, start_date: date) -> None:
