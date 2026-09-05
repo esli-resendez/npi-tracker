@@ -97,7 +97,7 @@ export function BomTab({ orderId }: { orderId: number }) {
         </MessageBar>
       )}
       <Text size={200} className={styles.hint}>
-        Expand a Rack Serial to see the Nodes installed on it, then Node a device to see its sub-components.
+        Expand a rack to see the devices installed on it, then expand a device to see its sub-components.
       </Text>
 
       <Table aria-label="Order BOM">
