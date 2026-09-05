@@ -80,12 +80,16 @@ export interface TestPlanCase {
   test_level: string;
   duration_minutes: number | null;
   sequence: number | null;
+  process_id: number | null;
+  process_name: string | null;
 }
 
 export interface OrderTestPlanOverview {
   test_plan: { test_plan_id: number; test_plan_name: string; test_plan_description: string | null } | null;
   test_cases: TestPlanCase[];
   duration_by_level: Record<string, number>;
+  // Nested rollup: level -> process (or "Unassigned") -> total minutes.
+  duration_by_level_process: Record<string, Record<string, number>>;
 }
 
 export interface OrderLogEntry {

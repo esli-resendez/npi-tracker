@@ -1,0 +1,15 @@
+This is the modification I need to make.
+
+In the BOM component I am displaying a list of the serial numbers that is expandible and displays the installed devices
+
+I want to make the following modifications for that display:
+1. Add the column 'position' to display in which position the device is installed. This information is obtained from the schema since we have a table dbo.rack_positions that collects the relationship between the order, the rack, and device id.
+For devices, show the position number. For rack, show 'RACK'
+2. Add the column 'STAGE' to the UI. The column stage is populated from two tables, one is 'rack_process_history' for the serial numbers that are racks, and the second table is 'device_process_history'. These two tables have the information of which process_id is the last one, and what process_result was recorded. There are two types of process_result in the schema, either PASS or FAIL. From the UI, there will be 3 possible states: if there is a process_result for the device_id or for the rack_id, then use that value. If there is no process_result for the device_id or rack_id, then show it as 'UNTESTED'.
+3. I want to display the status using a background color in the cell, for 'PASS' to be a light green, status for 'FAIL' to be a light orange, and status for UNTESTED to be light gray.
+4. I want to add on my backend the capability to receive a rack status or a device status. Keep in mind that the outside system only knows the serial number, doesn't know anything about my ids or internal relationships. Thus, the backend must process the request in the following way: it receives a POST request with the information of the serial number, the process_name and the status. The backend must decide if the current serial number exists in the schema, if it does not exists, then ignore the POST request as the current serial number is not being tracked. 
+
+5. The outside system is the source of truth of the existing processes and current status, which is why if the process does not exists in my dbo.processes table, it must be created. Since the same serial number might have multiple status, the one that must be displayed in the UI must be the last one 
+
+6. I want to create a small test bench for my new feature. Create a single component with no dependencies, this component will have 3 fields, serial_number, proces_name and result. The purpose will be simulating an inbound POST from an external system. You can put it as separate page and I can access it using the address bar as I will remove it later on
+

@@ -43,16 +43,31 @@ def get_order_test_plan(order_id: int, db: Session = Depends(get_db)):
     level values present in the data)."""
     plan = test_repository.get_test_plan_for_order(db, order_id)
     if plan is None:
-        return {"test_plan": None, "test_cases": [], "duration_by_level": {}}
+        return {"test_plan": None, "test_cases": [], "duration_by_level": {}, "duration_by_level_process": {}}
 
     cases = test_repository.get_test_cases_for_plan(db, plan["test_plan_id"])
 
+    # Nested duration rollup: level -> process -> total minutes, plus the
+    # flat per-level totals already used by the UI's level summary rows.
+    # Cases without a process_id yet (pre-migration / not backfilled) land
+    # in "Unassigned" rather than being dropped.
     duration_by_level: dict[str, int] = {}
+    duration_by_level_process: dict[str, dict[str, int]] = {}
     for case in cases:
         level = case["test_level"] or "UNSPECIFIED"
-        duration_by_level[level] = duration_by_level.get(level, 0) + (case["duration_minutes"] or 0)
+        process = case["process_name"] or "Unassigned"
+        minutes = case["duration_minutes"] or 0
 
-    return {"test_plan": plan, "test_cases": cases, "duration_by_level": duration_by_level}
+        duration_by_level[level] = duration_by_level.get(level, 0) + minutes
+        duration_by_level_process.setdefault(level, {})
+        duration_by_level_process[level][process] = duration_by_level_process[level].get(process, 0) + minutes
+
+    return {
+        "test_plan": plan,
+        "test_cases": cases,
+        "duration_by_level": duration_by_level,
+        "duration_by_level_process": duration_by_level_process,
+    }
 
 
 @router.get("/log")
