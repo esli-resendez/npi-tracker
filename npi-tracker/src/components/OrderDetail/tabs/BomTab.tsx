@@ -114,7 +114,7 @@ export function BomTab({ orderId }: { orderId: number }) {
       )}
       <Text size={200} className={styles.hint}>
         Expand a rack to see the devices installed on it, then expand a device to see its sub-components. Stage
-        reflects the most recent PASS/FAIL result reported for that rack or device.
+        shows the most recently reported process name for that rack or device, colored by its PASS/FAIL result.
       </Text>
 
       <Table aria-label="Order BOM">
@@ -143,7 +143,7 @@ export function BomTab({ orderId }: { orderId: number }) {
                   <TableCell>{rack.rack_sku}</TableCell>
                   <TableCell>{rack.rack_gen_name}</TableCell>
                   <TableCell>RACK</TableCell>
-                  <TableCell className={stageClass(rack.status)}>{rack.status}</TableCell>
+                  <TableCell className={stageClass(rack.status)}>{rack.stage}</TableCell>
                 </TableRow>
 
                 {devices?.map((device) => {
@@ -160,7 +160,7 @@ export function BomTab({ orderId }: { orderId: number }) {
                         <TableCell>{device.part_number}</TableCell>
                         <TableCell>{device.device_description}</TableCell>
                         <TableCell>{device.position}</TableCell>
-                        <TableCell className={stageClass(device.status)}>{device.status}</TableCell>
+                        <TableCell className={stageClass(device.status)}>{device.stage}</TableCell>
                       </TableRow>
 
                       {components?.map((component) => (
