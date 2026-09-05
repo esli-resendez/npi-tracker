@@ -12,6 +12,7 @@ export interface OrderRack {
   rack_sku: string;
   rack_gen_name: string | null;
   rack_sequence: number;
+  status: "PASS" | "FAIL" | "UNTESTED";
 }
 
 // Team assignment types
@@ -63,6 +64,7 @@ export interface RackDevice {
   part_number: string | null;
   position: number;
   device_description: string | null;
+  status: "PASS" | "FAIL" | "UNTESTED";
 }
 
 export interface DeviceComponent {
