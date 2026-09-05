@@ -40,12 +40,13 @@ def get_order_summary(db: Session, order_id: int):
 def get_order_racks(db: Session, order_id: int):
     rows = db.execute(
         text("""SELECT r.rack_id, r.rack_serial, r.rack_sku, r.rack_gen_name, orck.rack_sequence,
-                        latest.process_result AS latest_status
+                        latest.process_result AS latest_status, latest.process_name AS latest_stage
                  FROM dbo.racks r
                  JOIN dbo.order_racks orck ON orck.rack_id = r.rack_id
                  OUTER APPLY (
-                     SELECT TOP 1 rph.process_result
+                     SELECT TOP 1 rph.process_result, p.process_name
                      FROM dbo.rack_process_history rph
+                     JOIN dbo.processes p ON p.process_id = rph.process_id
                      WHERE rph.rack_id = r.rack_id
                      ORDER BY rph.started_at DESC, rph.rack_process_history_id DESC
                  ) latest
@@ -55,11 +56,17 @@ def get_order_racks(db: Session, order_id: int):
     ).mappings().all()
 
     # UNTESTED is a UI-level concept, not something stored in the DB -- a
-    # rack simply has no rack_process_history row yet.
+    # rack simply has no rack_process_history row yet. `status` (PASS/FAIL/
+    # UNTESTED) drives the cell's background color; `stage` is the process
+    # name actually shown as text (falling back to "UNTESTED" when there's
+    # no history at all).
     results = []
     for row in rows:
         row_dict = dict(row)
-        row_dict["status"] = row_dict.pop("latest_status") or "UNTESTED"
+        status = row_dict.pop("latest_status") or "UNTESTED"
+        stage = row_dict.pop("latest_stage") or "UNTESTED"
+        row_dict["status"] = status
+        row_dict["stage"] = stage
         results.append(row_dict)
     return results
 
