@@ -28,10 +28,26 @@ const useStyles = makeStyles({
   deviceRow: { backgroundColor: "#fafafa" },
   componentRow: { backgroundColor: "#f3f2f1" },
   expandCell: { width: "40px" },
+  // Stage cell colors: PASS light green, FAIL light orange, UNTESTED light gray.
+  stagePass: { backgroundColor: "#dff6dd", fontWeight: 600 },
+  stageFail: { backgroundColor: "#fde7d9", fontWeight: 600 },
+  stageUntested: { backgroundColor: "#e8e8e8", color: "#555555" },
 });
+
+type Stage = "PASS" | "FAIL" | "UNTESTED";
+
+function useStageClass(styles: ReturnType<typeof useStyles>) {
+  return (stage: Stage) => {
+    if (stage === "PASS") return styles.stagePass;
+    if (stage === "FAIL") return styles.stageFail;
+    return styles.stageUntested;
+  };
+}
 
 export function BomTab({ orderId }: { orderId: number }) {
   const styles = useStyles();
+  const stageClass = useStageClass(styles);
+
   const [racks, setRacks] = useState<OrderRack[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +113,8 @@ export function BomTab({ orderId }: { orderId: number }) {
         </MessageBar>
       )}
       <Text size={200} className={styles.hint}>
-        Expand a rack to see the devices installed on it, then expand a device to see its sub-components.
+        Expand a rack to see the devices installed on it, then expand a device to see its sub-components. Stage
+        shows the most recently reported process name for that rack or device, colored by its PASS/FAIL result.
       </Text>
 
       <Table aria-label="Order BOM">
@@ -107,6 +124,8 @@ export function BomTab({ orderId }: { orderId: number }) {
             <TableHeaderCell>Serial number</TableHeaderCell>
             <TableHeaderCell>Part number</TableHeaderCell>
             <TableHeaderCell>Description</TableHeaderCell>
+            <TableHeaderCell>Position</TableHeaderCell>
+            <TableHeaderCell>Stage</TableHeaderCell>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -123,6 +142,8 @@ export function BomTab({ orderId }: { orderId: number }) {
                   <TableCell>{rack.rack_serial}</TableCell>
                   <TableCell>{rack.rack_sku}</TableCell>
                   <TableCell>{rack.rack_gen_name}</TableCell>
+                  <TableCell>RACK</TableCell>
+                  <TableCell className={stageClass(rack.status)}>{rack.stage}</TableCell>
                 </TableRow>
 
                 {devices?.map((device) => {
@@ -138,6 +159,8 @@ export function BomTab({ orderId }: { orderId: number }) {
                         <TableCell>{device.serial_number}</TableCell>
                         <TableCell>{device.part_number}</TableCell>
                         <TableCell>{device.device_description}</TableCell>
+                        <TableCell>{device.position}</TableCell>
+                        <TableCell className={stageClass(device.status)}>{device.stage}</TableCell>
                       </TableRow>
 
                       {components?.map((component) => (
@@ -149,12 +172,14 @@ export function BomTab({ orderId }: { orderId: number }) {
                             {component.component_name}
                             {component.component_role ? ` (${component.component_role})` : ""}
                           </TableCell>
+                          <TableCell></TableCell>
+                          <TableCell></TableCell>
                         </TableRow>
                       ))}
                       {components && components.length === 0 && (
                         <TableRow className={styles.componentRow}>
                           <TableCell></TableCell>
-                          <TableCell colSpan={3}>No components recorded for this device.</TableCell>
+                          <TableCell colSpan={5}>No components recorded for this device.</TableCell>
                         </TableRow>
                       )}
                     </Fragment>
@@ -163,7 +188,7 @@ export function BomTab({ orderId }: { orderId: number }) {
                 {devices && devices.length === 0 && (
                   <TableRow className={styles.deviceRow}>
                     <TableCell></TableCell>
-                    <TableCell colSpan={3}>No devices recorded for this rack.</TableCell>
+                    <TableCell colSpan={5}>No devices recorded for this rack.</TableCell>
                   </TableRow>
                 )}
               </Fragment>
@@ -171,7 +196,7 @@ export function BomTab({ orderId }: { orderId: number }) {
           })}
           {racks.length === 0 && (
             <TableRow>
-              <TableCell colSpan={4}>No racks linked to this order yet.</TableCell>
+              <TableCell colSpan={6}>No racks linked to this order yet.</TableCell>
             </TableRow>
           )}
         </TableBody>
